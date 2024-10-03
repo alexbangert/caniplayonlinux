@@ -4,7 +4,7 @@ import { Badge } from "../ui/badge";
 import Image from "next/image";
 
 export async function GameCard({ appId }: { appId: number }) {
-  const data = await getData(appId);
+  const { app, averageScore } = await getData(appId);
 
   const getRatingColor = (rating: number) => {
     if (rating >= 0.7) return "bg-green-500";
@@ -18,27 +18,27 @@ export async function GameCard({ appId }: { appId: number }) {
         <div className="w-1/3 relative">
           <Image
             src={`https://steamcdn-a.akamaihd.net/steam/apps/${appId}/header.jpg`}
-            alt={`Steam App ${appId}`}
+            alt={`Steam App ${app?.title}`}
             layout="fill"
             objectFit="cover"
           />
         </div>
-        <CardContent className="w-2/3 p-6 flex">
-          <div className="flex-1 flex flex-col justify-between">
+        <CardContent className="w-2/3 p-6 flex flex-col">
+          <div className="flex justify-between items-start mb-4">
             <div>
-              <h2 className="text-2xl font-bold mb-2">{appId}</h2>
+              <h2 className="text-2xl font-bold mb-2">{app?.title}</h2>
               <Badge variant="secondary" className="text-lg py-1 px-2">
-                Grafikkarte?
+                GK
               </Badge>
             </div>
-          </div>
-          <div className="w-24 flex flex-col items-center justify-center">
-            <div
-              className={`w-16 h-16 rounded-full ${getRatingColor(data.averageScore)} flex items-center justify-center`}
-            >
-              <span className="text-white text-xl font-bold">
-                {Math.round(data.averageScore * 10)}
-              </span>
+            <div className="flex flex-col items-center">
+              <div
+                className={`w-12 h-12 rounded-full ${getRatingColor(averageScore)} flex items-center justify-center`}
+              >
+                <span className="text-white text-lg font-bold">
+                  {Math.round(averageScore) * 10}
+                </span>
+              </div>
             </div>
           </div>
         </CardContent>
@@ -48,7 +48,7 @@ export async function GameCard({ appId }: { appId: number }) {
 }
 
 const getData = async (appId: number) => {
-  const [averageResult, reports] = await Promise.all([
+  const [averageResult, app] = await Promise.all([
     prisma.report.aggregate({
       where: {
         appId: appId,
@@ -57,19 +57,15 @@ const getData = async (appId: number) => {
       _avg: { score: true },
       _count: { score: true },
     }),
-    prisma.report.findMany({
-      where: {
-        appId: appId,
-        starts_play: { not: null },
-      },
+    prisma.app.findUnique({
+      where: { id: appId },
+      select: { title: true },
     }),
   ]);
 
-  console.debug(averageResult);
-
   return {
+    app,
     averageScore: averageResult._avg?.score ?? 0,
     totalReports: averageResult._count?.score ?? 0,
-    reports: reports,
   };
 };
