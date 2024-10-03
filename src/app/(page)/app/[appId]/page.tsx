@@ -1,3 +1,4 @@
+import GameDetails from "@/components/molecules/GameDetails";
 import prisma from "@/lib/db";
 import { notFound } from "next/navigation";
 
@@ -14,26 +15,7 @@ export default async function AppPage({
     notFound();
   }
 
-  return (
-    <div>
-      <h1>{app.title}</h1>
-      <h2>Reports:</h2>
-      <ul>
-        {app.reports.map((report) => (
-          <li key={report.timestamp.toString()}>
-            Timestamp:{" "}
-            {new Date(Number(report.timestamp) * 1000).toLocaleString()}
-            <br />
-            Starts Play: {report.starts_play ? "Yes" : "No"}
-            <br />
-            Score: {report.score}
-            <br />
-            GPU: {report.gpu || "Not specified"}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+  return <GameDetails appId={params.appId} />;
 }
 
 const getData = async (appId: number) => {
