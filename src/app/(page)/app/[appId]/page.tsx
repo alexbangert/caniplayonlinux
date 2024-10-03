@@ -2,11 +2,11 @@ import prisma from "@/lib/db";
 import { notFound } from "next/navigation";
 
 export default async function AppPage({
-  params: { appId },
+  params,
 }: {
   params: { appId: number };
 }) {
-  const { app } = await getData(1085660);
+  const { app } = await getData(params.appId);
 
   console.debug(app);
 
@@ -39,7 +39,7 @@ export default async function AppPage({
 const getData = async (appId: number) => {
   const [app] = await Promise.all([
     prisma.app.findUnique({
-      where: { id: appId },
+      where: { id: parseInt(appId + "") }, // Why this workaround?
       include: {
         reports: {
           orderBy: {

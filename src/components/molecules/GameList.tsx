@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { GameCard } from "./GameCard";
 import { Suspense } from "react";
 
