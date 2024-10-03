@@ -1,0 +1,28 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model App {
+  id      Int      @id @default(autoincrement())
+  title   String
+  reports Report[]
+
+  @@map(name: "apps")
+}
+
+model Report {
+  appId       Int
+  timestamp   BigInt
+  starts_play Boolean?
+  score       Int @default(0)
+  gpu         String?
+  App         App     @relation(fields: [appId], references: [id])
+
+  @@id([appId, timestamp])
+  @@map(name: "reports")
+}
