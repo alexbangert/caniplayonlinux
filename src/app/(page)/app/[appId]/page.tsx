@@ -9,8 +9,6 @@ export default async function AppPage({
 }) {
   const { app } = await getData(params.appId);
 
-  console.debug(app);
-
   if (!app) {
     notFound();
   }
